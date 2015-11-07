@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "29a483df3bb9770b4f8b5a8a75243151",
-    "content-hash": "c87e5e70b233508322a84078d7d248a9",
+    "hash": "74f9b7f6caa5449812d39055fad937a4",
+    "content-hash": "aead444a1967667d4368c0034c851ef9",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -519,16 +519,16 @@
         },
         {
             "name": "doctrine/inflector",
-            "version": "v1.0.1",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/inflector.git",
-                "reference": "0bcb2e79d8571787f18b7eb036ed3d004908e604"
+                "reference": "90b2128806bfde671b6952ab8bea493942c1fdae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/inflector/zipball/0bcb2e79d8571787f18b7eb036ed3d004908e604",
-                "reference": "0bcb2e79d8571787f18b7eb036ed3d004908e604",
+                "url": "https://api.github.com/repos/doctrine/inflector/zipball/90b2128806bfde671b6952ab8bea493942c1fdae",
+                "reference": "90b2128806bfde671b6952ab8bea493942c1fdae",
                 "shasum": ""
             },
             "require": {
@@ -540,7 +540,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -582,7 +582,7 @@
                 "singularize",
                 "string"
             ],
-            "time": "2014-12-20 21:24:13"
+            "time": "2015-11-06 14:35:42"
         },
         {
             "name": "doctrine/instantiator",
@@ -764,7 +764,7 @@
         },
         {
             "name": "doctrine/mongodb-odm",
-            "version": "1.0.3",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/mongodb-odm.git",
@@ -1408,6 +1408,57 @@
             "time": "2015-10-15 01:33:42"
         },
         {
+            "name": "michelf/php-markdown",
+            "version": "1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/michelf/php-markdown.git",
+                "reference": "e1aabe18173231ebcefc90e615565742fc1c7fd9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/michelf/php-markdown/zipball/e1aabe18173231ebcefc90e615565742fc1c7fd9",
+                "reference": "e1aabe18173231ebcefc90e615565742fc1c7fd9",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-lib": "1.4.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Michelf": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "John Gruber",
+                    "homepage": "http://daringfireball.net/"
+                },
+                {
+                    "name": "Michel Fortin",
+                    "email": "michel.fortin@michelf.ca",
+                    "homepage": "https://michelf.ca/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP Markdown",
+            "homepage": "https://michelf.ca/projects/php-markdown/",
+            "keywords": [
+                "markdown"
+            ],
+            "time": "2015-03-01 12:03:08"
+        },
+        {
             "name": "monolog/monolog",
             "version": "1.17.2",
             "source": {
@@ -1483,6 +1534,88 @@
                 "psr-3"
             ],
             "time": "2015-10-14 12:51:02"
+        },
+        {
+            "name": "nelmio/api-doc-bundle",
+            "version": "2.10.3",
+            "target-dir": "Nelmio/ApiDocBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nelmio/NelmioApiDocBundle.git",
+                "reference": "be90e8aad60b7701097b900c4a3a971a50f9862e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nelmio/NelmioApiDocBundle/zipball/be90e8aad60b7701097b900c4a3a971a50f9862e",
+                "reference": "be90e8aad60b7701097b900c4a3a971a50f9862e",
+                "shasum": ""
+            },
+            "require": {
+                "michelf/php-markdown": "~1.4",
+                "php": ">=5.3",
+                "symfony/console": "~2.3",
+                "symfony/framework-bundle": "~2.3",
+                "symfony/twig-bundle": "~2.3"
+            },
+            "conflict": {
+                "jms/serializer": "<0.12",
+                "jms/serializer-bundle": "<0.11",
+                "twig/twig": "<1.12"
+            },
+            "require-dev": {
+                "dunglas/api-bundle": "~1.0",
+                "friendsofsymfony/rest-bundle": "~1.0",
+                "jms/serializer-bundle": ">=0.11",
+                "sensio/framework-extra-bundle": "~3.0",
+                "symfony/browser-kit": "~2.3",
+                "symfony/css-selector": "~2.3",
+                "symfony/finder": "~2.3",
+                "symfony/form": "~2.3",
+                "symfony/phpunit-bridge": "~2.7",
+                "symfony/serializer": "~2.7",
+                "symfony/validator": "~2.3",
+                "symfony/yaml": "~2.3"
+            },
+            "suggest": {
+                "dunglas/api-bundle": "For making use of resources definitions of DunglasApiBundle.",
+                "friendsofsymfony/rest-bundle": "For making use of REST information in the doc.",
+                "jms/serializer": "For making use of serializer information in the doc.",
+                "symfony/form": "For using form definitions as input.",
+                "symfony/validator": "For making use of validator information in the doc."
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.10.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Nelmio\\ApiDocBundle": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nelmio",
+                    "homepage": "http://nelm.io"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://github.com/nelmio/NelmioApiDocBundle/contributors"
+                }
+            ],
+            "description": "Generates documentation for your REST API from annotations",
+            "keywords": [
+                "api",
+                "doc",
+                "documentation",
+                "rest"
+            ],
+            "time": "2015-10-28 09:30:40"
         },
         {
             "name": "phpcollection/phpcollection",
@@ -1739,20 +1872,20 @@
         },
         {
             "name": "sensiolabs/security-checker",
-            "version": "v3.0.1",
+            "version": "v3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sensiolabs/security-checker.git",
-                "reference": "7735fd97ff7303d9df776b8dbc970f949399abc9"
+                "reference": "21696b0daa731064c23cfb694c60a2584a7b6e93"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sensiolabs/security-checker/zipball/7735fd97ff7303d9df776b8dbc970f949399abc9",
-                "reference": "7735fd97ff7303d9df776b8dbc970f949399abc9",
+                "url": "https://api.github.com/repos/sensiolabs/security-checker/zipball/21696b0daa731064c23cfb694c60a2584a7b6e93",
+                "reference": "21696b0daa731064c23cfb694c60a2584a7b6e93",
                 "shasum": ""
             },
             "require": {
-                "symfony/console": "~2.0"
+                "symfony/console": "~2.0|~3.0"
             },
             "bin": [
                 "security-checker"
@@ -1779,7 +1912,7 @@
                 }
             ],
             "description": "A security checker for your composer.lock",
-            "time": "2015-08-11 12:11:25"
+            "time": "2015-11-07 08:07:40"
         },
         {
             "name": "symfony/assetic-bundle",
@@ -3082,11 +3215,14 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "doctrine/mongodb-odm": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.3.9"
+        "php": ">=5.3.9",
+        "ext-memcached": ">=1.0"
     },
     "platform-dev": []
 }

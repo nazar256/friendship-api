@@ -4,6 +4,11 @@ parameters:
 #    parameter_name: value
 
 services:
-#    service_name:
-#        class: AppBundle\Directory\ClassName
-#        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+    memcached:
+        class: Memcached
+        calls:
+            - [ addServers, [ %memcached.servers% ]]
+    doctrine.cache.memcached:
+        class: Doctrine\Common\Cache\MemcachedCache
+        calls:
+            - [setMemcached, [@memcached]]

@@ -70,11 +70,11 @@ fos_rest:
     routing_loader:
         default_format: json
 
-
-
 sensio_framework_extra:
     request: { converters: true }
     view:
         annotations: false
     router:
         annotations: true
+
+nelmio_api_doc: ~

@@ -6,6 +6,7 @@ parameters:
     mongo_database: friendship-api
     # You should uncomment this if you want use pdo_sqlite
     # database_path: "%kernel.root_dir%/data.db3"
+    fos_rest.failed_validation: 422
 
     memcached.servers:
             - { host: 127.0.0.1, port: 11211 }

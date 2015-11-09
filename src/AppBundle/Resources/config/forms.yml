@@ -1,0 +1,5 @@
+services:
+  app.form.user:
+    class: AppBundle\Form\UserType
+    tags:
+      - { name: form.type, alias: user }

@@ -1,0 +1,4 @@
+services:
+    app_bundle.resource:
+        class: AppBundle\Handler\ResourceHandler
+        arguments: [ @doctrine_mongodb.odm.document_manager, @form.factory, @security.token_storage]

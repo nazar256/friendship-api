@@ -11,3 +11,6 @@ framework:
 web_profiler:
     toolbar: false
     intercept_redirects: false
+
+doctrine_mongodb:
+    default_database: %mongo_database%_test

@@ -1,0 +1,6 @@
+user:
+    type: rest
+    prefix: users
+    resource: "AppBundle\Controller\UserController"
+    defaults:
+        _format: json

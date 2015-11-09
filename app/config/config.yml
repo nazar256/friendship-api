@@ -16,7 +16,7 @@ framework:
         resource: "%kernel.root_dir%/config/routing.yml"
         strict_requirements: ~
     form:            ~
-    csrf_protection: ~
+    csrf_protection: false
     validation:      { enable_annotations: true }
     #serializer:      { enable_annotations: true }
     templating:
@@ -40,6 +40,41 @@ doctrine_mongodb:
     default_database: %mongo_database%
     document_managers:
         default:
+            auto_mapping: true
             metadata_cache_driver :
                 type: service
                 id: doctrine.cache.memcached
+
+fos_rest:
+    param_fetcher_listener: true
+    view:
+        view_response_listener: 'force'
+    format_listener:
+        rules:
+            - { path: ^/, priorities: [json], fallback_format: json, prefer_extension: false }
+    exception:
+        enabled: true
+        codes:
+            'Symfony\Component\Routing\Exception\ResourceNotFoundException': HTTP_NOT_FOUND
+            'JMS\Serializer\Exception\ValidationFailedException': HTTP_UNPROCESSABLE_ENTITY
+        messages:
+            'Symfony\Component\Routing\Exception\ResourceNotFoundException': true
+    allowed_methods_listener: true
+    access_denied_listener:
+        json: true
+    disable_csrf_role: ROLE_API
+    serializer:
+        serialize_null: true
+    body_listener:
+        default_format: json
+    routing_loader:
+        default_format: json
+
+
+
+sensio_framework_extra:
+    request: { converters: true }
+    view:
+        annotations: false
+    router:
+        annotations: true

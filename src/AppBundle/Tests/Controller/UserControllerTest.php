@@ -51,6 +51,7 @@ class UserControllerTest extends RestControllerTestCase
                          ->getRepository('AppBundle:User')
                          ->find($userId);
             $this->assertInstanceOf('AppBundle\Document\User', $user);
+            $this->assertArrayNotHasKey('password', $responseData);
         } else {
             $this->assertArrayHasKey('code', $responseData);
             $this->assertEquals($responseData['code'], $expectedStatusCode);

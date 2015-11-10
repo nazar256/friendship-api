@@ -2,6 +2,8 @@ AppBundle\Document\User:
     exclusion_policy: ALL
     properties:
         id:
+            type: string
             expose: true
         email:
+            type: string
             expose: true

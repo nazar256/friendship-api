@@ -14,6 +14,7 @@ class User implements UserInterface, \Serializable
     const ALIAS = 'user';
 
     /**
+     * @var string
      * @MongoDB\Id
      */
     private $id;

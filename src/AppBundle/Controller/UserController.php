@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class UserController extends RestController
 {
-
     /** @var string */
     protected $formName = 'user';
 
@@ -32,6 +31,7 @@ class UserController extends RestController
     }
 
     /**
+     * @Post("/register")
      * @ApiDoc(
      *  resource=true,
      *  description="Creates a new user",
@@ -40,13 +40,15 @@ class UserController extends RestController
      *      "options" = {"method" = "POST"},
      *      "name" = ""
      *  },
-     *  output = "AppBundle\Document\User",
+     *  output = {
+     *      "class"="AppBundle\Document\User",
+     *      "parsers"={"Nelmio\ApiDocBundle\Parser\JmsMetadataParser"}
+     *  },
      *  statusCodes={
      *      201="User successfully created",
      *      422="Validation failed"
      *  }
      * )
-     * @Post("/register")
      * @View(statusCode=201, templateVar="user", template="json")
      * @param Request $request
      * @return User

@@ -8,6 +8,9 @@ parameters:
     # database_path: "%kernel.root_dir%/data.db3"
     fos_rest.failed_validation: 422
 
+    test_user.email: 'somee_email@gmail.com'
+    test_user.password: 'SecurePassword123'
+
     memcached.servers:
             - { host: 127.0.0.1, port: 11211 }
 

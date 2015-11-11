@@ -63,4 +63,12 @@ class UserControllerTest extends RestControllerTestCase
             $this->assertArrayHasKey('password', $responseData['errors']['children']);
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getFixtures()
+    {
+        return [];
+    }
 }

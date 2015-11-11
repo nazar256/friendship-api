@@ -1,5 +1,5 @@
 parameters:
-    user_class: AppBundle\Entity\User
+    user_class: AppBundle\Document\User
 
 security:
 
@@ -9,8 +9,10 @@ security:
             cost:      13
 
     providers:
-        in_memory:
-            memory: ~
+        app_user_provider:
+            mongodb:
+                class: %user_class%
+                property: email
 
     firewalls:
         dev:
@@ -20,7 +22,31 @@ security:
             pattern: ^/api/users/register
             context: app
             anonymous: ~
+        login:
+            pattern: ^/api/users/(login|login_check|logout)
+            context: app
+            anonymous: ~
+        main:
+            context: app
+            provider: app_user_provider
+            pattern: ^/api
+
+            form_login:
+                login_path: /users/login
+                check_path: login_check
+                provider: app_user_provider
+                use_forward: false
+                default_target_path: /w
+                username_parameter: email
+                password_parameter: password
+
+            logout:
+                path:               users/logout
+                target: /
+                invalidate_session: true
+            anonymous: false
 
     access_control:
         - { path: ^/api/users/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/users/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/, roles: ROLE_USER }

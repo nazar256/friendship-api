@@ -2,14 +2,20 @@
 
 namespace TestingBundle\Tests\Controller;
 
+use AppBundle\Document\DocumentInterface;
 use AppBundle\Helper\Dictionary\HttpMethod;
+use Doctrine\Common\Annotations\Annotation\IgnoreAnnotation;
+use Doctrine\Common\DataFixtures\Executor\MongoDBExecutor;
+use Doctrine\Common\DataFixtures\ReferenceRepository;
 use FOS\RestBundle\Util\Codes;
+use Liip\FunctionalTestBundle\Test\WebTestCase;
 use Symfony\Bundle\FrameworkBundle\Client;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Contains helpful methods to simplify REST functional testing
+ * @IgnoreAnnotation("dataProvider")
+ * @IgnoreAnnotation("depends")
  */
 abstract class RestControllerTestCase extends WebTestCase
 {
@@ -19,9 +25,17 @@ abstract class RestControllerTestCase extends WebTestCase
      */
     private $client;
 
+    /**
+     * @var ReferenceRepository
+     */
+    private $fixtures;
+
     public function setUp()
     {
-        $this->client = self::createClient();
+        $this->client = static::makeClient();
+        /** @var MongoDBExecutor $fixtureExecutor */
+        $fixtureExecutor = $this->loadFixtures($this->getFixtures(), null, 'doctrine_mongodb');
+        $this->fixtures = $fixtureExecutor->getReferenceRepository();
     }
 
     /**
@@ -81,8 +95,8 @@ abstract class RestControllerTestCase extends WebTestCase
 
     /**
      * performs POST request
-     * @param string  $route
-     * @param array $params
+     * @param string $route
+     * @param array  $params
      * @return null|Response
      */
     protected function postRequest($route, array $params)
@@ -99,4 +113,18 @@ abstract class RestControllerTestCase extends WebTestCase
 
         return $client->getResponse();
     }
+
+    /**
+     * @param string $fixtureName
+     * @return DocumentInterface
+     */
+    protected function getFixture($fixtureName)
+    {
+        return $this->fixtures->getReference($fixtureName);
+    }
+
+    /**
+     * @return string[]
+     */
+    protected abstract function getFixtures();
 }

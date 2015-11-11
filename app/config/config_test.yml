@@ -14,3 +14,11 @@ web_profiler:
 
 doctrine_mongodb:
     default_database: %mongo_database%_test
+
+liip_functional_test:
+    cache_sqlite_db: true
+    authentication:
+        username: %test_user.email%
+        password: %test_user.password%
+    query:
+        max_query_count: 5

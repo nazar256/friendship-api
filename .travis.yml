@@ -9,6 +9,7 @@ php:
 before_script:
   - cp app/config/parameters.yml.dist app/config/parameters.yml
   - echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - composer install
 
 script:

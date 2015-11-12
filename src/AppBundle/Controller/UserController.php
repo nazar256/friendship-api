@@ -8,6 +8,7 @@ use FOS\RestBundle\Controller\Annotations\Post;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
  * Class UserController
@@ -67,5 +68,29 @@ class UserController extends RestController
     public function postAction(Request $request)
     {
         return $this->createResource($request);
+    }
+
+    /**
+     * @Post("/{user}/friendship/request")
+     * @ApiDoc(
+     *  resource=false,
+     *  description="Creates a friendship request of current user to desired one",
+     *  statusCodes={
+     *      401 = "Unauthorized - log in first",
+     *      204 = "Successfully requested"
+     *  }
+     * )
+     * @param User $user
+     */
+    public function requestFriendshipAction(User $user)
+    {
+        $currentUser = $this->getUser();
+        if ( !$currentUser instanceof User) {
+            throw new UnauthorizedHttpException('Probably you are not authorized');
+        }
+
+        $user->addRequest($currentUser->getId());
+        $dm = $this->get('doctrine.odm.mongodb.document_manager');
+        $dm->flush();
     }
 }

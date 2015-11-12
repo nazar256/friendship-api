@@ -24,6 +24,7 @@ class User implements UserInterface, \Serializable
      * @Assert\NotBlank()
      * @Assert\Email(checkMX=true, checkHost=true)
      * @MongoDB\String
+     * @MongoDB\Index()
      */
     private $email;
 
@@ -133,7 +134,9 @@ class User implements UserInterface, \Serializable
      */
     public function addFriend($friendId)
     {
-        $this->friends[] = $friendId;
+        if ( !in_array($friendId, $this->friends)) {
+            $this->friends[] = $friendId;
+        }
 
         return $this;
     }
@@ -152,7 +155,9 @@ class User implements UserInterface, \Serializable
      */
     public function addRequest($userId)
     {
-        $this->requests[] = $userId;
+        if ( !in_array($userId, $this->requests)) {
+            $this->requests[] = $userId;
+        }
 
         return $this;
     }
@@ -183,7 +188,7 @@ class User implements UserInterface, \Serializable
     /**
      * {@inheritdoc}
      */
-    public function unserialize($serialized)
+    public function unSerialize($serialized)
     {
         list (
             $this->id,

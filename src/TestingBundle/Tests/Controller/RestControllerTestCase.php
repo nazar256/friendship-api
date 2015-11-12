@@ -2,11 +2,11 @@
 
 namespace TestingBundle\Tests\Controller;
 
-use AppBundle\Document\DocumentInterface;
+use AppBundle\Document\User;
 use AppBundle\Helper\Dictionary\HttpMethod;
+use AppBundle\Helper\Dictionary\SystemService;
 use Doctrine\Common\Annotations\Annotation\IgnoreAnnotation;
-use Doctrine\Common\DataFixtures\Executor\MongoDBExecutor;
-use Doctrine\Common\DataFixtures\ReferenceRepository;
+use Doctrine\ODM\MongoDB\DocumentManager;
 use FOS\RestBundle\Util\Codes;
 use Liip\FunctionalTestBundle\Test\WebTestCase;
 use Symfony\Bundle\FrameworkBundle\Client;
@@ -19,23 +19,14 @@ use Symfony\Component\HttpFoundation\Response;
  */
 abstract class RestControllerTestCase extends WebTestCase
 {
-
     /**
      * @var Client
      */
     private $client;
 
-    /**
-     * @var ReferenceRepository
-     */
-    private $fixtures;
-
     public function setUp()
     {
         $this->client = static::makeClient();
-        /** @var MongoDBExecutor $fixtureExecutor */
-        $fixtureExecutor = $this->loadFixtures($this->getFixtures(), null, 'doctrine_mongodb');
-        $this->fixtures = $fixtureExecutor->getReferenceRepository();
     }
 
     /**
@@ -99,7 +90,7 @@ abstract class RestControllerTestCase extends WebTestCase
      * @param array  $params
      * @return null|Response
      */
-    protected function postRequest($route, array $params)
+    protected function postRequest($route, array $params = [])
     {
         return $this->makeRequest($route, HttpMethod::POST, [], json_encode($params));
     }
@@ -137,16 +128,16 @@ abstract class RestControllerTestCase extends WebTestCase
     }
 
     /**
-     * @param string $fixtureName
-     * @return DocumentInterface
+     * @param string $email
+     * @return User
      */
-    protected function getFixture($fixtureName)
+    protected function getUserByEmail($email)
     {
-        return $this->fixtures->getReference($fixtureName);
-    }
+        /** @var DocumentManager $dm */
+        $dm = $this->getService(SystemService::ODM);
 
-    /**
-     * @return string[]
-     */
-    protected abstract function getFixtures();
+        return $dm
+            ->getRepository('AppBundle:User')
+            ->findOneBy(['email' => $email]);
+    }
 }

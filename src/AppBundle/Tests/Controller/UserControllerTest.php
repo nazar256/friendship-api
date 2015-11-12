@@ -2,9 +2,10 @@
 
 namespace AppBundle\Tests\Controller;
 
+use AppBundle\DataFixtures\MongoDB\UsersFixture;
 use AppBundle\Document\User;
-use AppBundle\Fixtures\UsersFixture;
 use AppBundle\Helper\Dictionary\SystemService;
+use Doctrine\ODM\MongoDB\DocumentManager;
 use FOS\RestBundle\Util\Codes;
 use TestingBundle\Helper\UniqueParamGenerator;
 use TestingBundle\Tests\Controller\RestControllerTestCase;
@@ -15,8 +16,9 @@ use TestingBundle\Tests\Controller\RestControllerTestCase;
  */
 class UserControllerTest extends RestControllerTestCase
 {
-    const ROUTE_REGISTER = '/api/users/register';
-    const ROUTE_USER     = '/api/users/%s';
+    const ROUTE_REGISTER           = '/api/users/register';
+    const ROUTE_USER               = '/api/users/%s';
+    const ROUTE_REQUEST_FRIENDSHIP = '/api/users/%s/friendship/request';
 
     /**
      * @return array
@@ -28,7 +30,7 @@ class UserControllerTest extends RestControllerTestCase
             [UniqueParamGenerator::generateTestEmail(), 'short', false],
             ['invalid@email', 'SecurePass123', false],
             ['invalid@email', 'SecurePass123', false],
-            ['invalid@domain.ololo', 'SecurePass123', false],
+            ['invalid@domain.bad', 'SecurePass123', false],
         ];
     }
 
@@ -69,14 +71,9 @@ class UserControllerTest extends RestControllerTestCase
 
     public function testUserRouteReturnsFriendsList()
     {
-        /** @var User $user */
-        $user = $this->getFixture(UsersFixture::REFERENCE_DEFAULT_USER);
+        $user = $this->getUserByEmail(UsersFixture::TEST_EMAIL);
         $userRoute = sprintf(self::ROUTE_USER, $user->getId());
-        $loginParams = [
-            'email'    => UsersFixture::TEST_EMAIL,
-            'password' => UsersFixture::TEST_PASS
-        ];
-        $this->postRequest(SecurityControllerTest::ROUTE_LOGIN, $loginParams);
+        $this->logUserIn();
         $response = $this->getRequest($userRoute);
         $responseData = $this->assertJsonResponse($response, Codes::HTTP_OK);
 
@@ -95,13 +92,31 @@ class UserControllerTest extends RestControllerTestCase
         $this->assertEquals($user->getRequests(), $responseFriendRequests);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getFixtures()
+    public function testUserCanSendFriendRequest()
     {
-        return [
-            'AppBundle\Fixtures\UsersFixture'
+        $clientUser = $this->getUserByEmail(UsersFixture::CLIENT_EMAIL);
+        /** @var DocumentManager $dm */
+        $dm = $this->getService(SystemService::ODM);
+        /** @var User $defaultUser */
+        $defaultUser = $this->getUserByEmail(UsersFixture::TEST_EMAIL);
+        $this->logUserIn($clientUser->getEmail());
+        $route = sprintf(self::ROUTE_REQUEST_FRIENDSHIP, $defaultUser->getId());
+        $response = $this->postRequest($route);
+        $this->assertEquals(Codes::HTTP_NO_CONTENT, $response->getStatusCode());
+        $dm->refresh($defaultUser);
+        $this->assertContains($clientUser->getId(), $defaultUser->getRequests());
+    }
+
+    /**
+     * @param string $email
+     */
+    private function logUserIn($email = UsersFixture::TEST_EMAIL)
+    {
+        $loginParams = [
+            'email'    => $email,
+            'password' => UsersFixture::TEST_PASS
         ];
+        $response = $this->postRequest(SecurityControllerTest::ROUTE_LOGIN, $loginParams);
+        $this->assertEquals(Codes::HTTP_OK, $response->getStatusCode());
     }
 }

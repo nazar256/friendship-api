@@ -1,8 +1,8 @@
 <?php
 namespace AppBundle\Tests\Controller;
 
+use AppBundle\DataFixtures\MongoDB\UsersFixture;
 use AppBundle\Document\User;
-use AppBundle\Fixtures\UsersFixture;
 use FOS\RestBundle\Util\Codes;
 use TestingBundle\Tests\Controller\RestControllerTestCase;
 
@@ -15,22 +15,12 @@ class SecurityControllerTest extends RestControllerTestCase
     const ROUTE_LOGIN = '/api/users/login';
 
     /**
-     * {@inheritdoc}
-     */
-    protected function getFixtures()
-    {
-        return [
-            'AppBundle\Fixtures\UsersFixture'
-        ];
-    }
-
-    /**
      * @return array
      */
     public function loginParamsProvider()
     {
         return [
-            ['invald@email.ololo', UsersFixture::TEST_PASS, Codes::HTTP_NOT_FOUND],
+            ['invalid@email.bad', UsersFixture::TEST_PASS, Codes::HTTP_NOT_FOUND],
             [UsersFixture::TEST_EMAIL, 'WrongPass', Codes::HTTP_UNAUTHORIZED],
             [UsersFixture::TEST_EMAIL, UsersFixture::TEST_PASS, Codes::HTTP_OK],
         ];
@@ -53,7 +43,7 @@ class SecurityControllerTest extends RestControllerTestCase
         if ($expectedStatusCode === Codes::HTTP_OK) {
             $this->assertArrayHasKey('id', $responseData);
             /** @var User $user */
-            $user = $this->getFixture(UsersFixture::REFERENCE_DEFAULT_USER);
+            $user = $this->getUserByEmail(UsersFixture::TEST_EMAIL);
             $this->assertEquals($user->getId(), $responseData['id']);
             $this->assertArrayHasKey('email', $responseData);
             $this->assertEquals($user->getEmail(), $responseData['email']);

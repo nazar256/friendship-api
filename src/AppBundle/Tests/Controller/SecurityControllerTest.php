@@ -53,7 +53,7 @@ class SecurityControllerTest extends RestControllerTestCase
         if ($expectedStatusCode === Codes::HTTP_OK) {
             $this->assertArrayHasKey('id', $responseData);
             /** @var User $user */
-            $user = $this->getFixture(UsersFixture::REFERENCE_USER);
+            $user = $this->getFixture(UsersFixture::REFERENCE_DEFAULT_USER);
             $this->assertEquals($user->getId(), $responseData['id']);
             $this->assertArrayHasKey('email', $responseData);
             $this->assertEquals($user->getEmail(), $responseData['email']);

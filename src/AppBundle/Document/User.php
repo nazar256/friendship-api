@@ -36,6 +36,18 @@ class User implements UserInterface, \Serializable
     private $password;
 
     /**
+     * @var array
+     * @MongoDB\Collection()
+     */
+    private $friends = [];
+
+    /**
+     * @var array
+     * @MongoDB\Collection()
+     */
+    private $requests = [];
+
+    /**
      * @return int
      */
     public function getId()
@@ -106,6 +118,45 @@ class User implements UserInterface, \Serializable
 
         return $this;
     }
+
+    /**
+     * @return array
+     */
+    public function getFriends()
+    {
+        return $this->friends;
+    }
+
+    /**
+     * @param string $friendId
+     * @return $this
+     */
+    public function addFriend($friendId)
+    {
+        $this->friends[] = $friendId;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRequests()
+    {
+        return $this->requests;
+    }
+
+    /**
+     * @param string $userId
+     * @return $this
+     */
+    public function addRequest($userId)
+    {
+        $this->requests[] = $userId;
+
+        return $this;
+    }
+
 
     /**
      * {@inheritdoc}

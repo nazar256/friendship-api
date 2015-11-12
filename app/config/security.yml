@@ -22,6 +22,10 @@ security:
             pattern: ^/api/users/register
             context: app
             anonymous: ~
+        doc:
+            pattern: ^/api/doc
+            context: app
+            anonymous: ~
         login:
             pattern: ^/api/users/(login|login_check|logout)
             context: app
@@ -47,6 +51,7 @@ security:
             anonymous: false
 
     access_control:
+        - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/users/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/users/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/, roles: ROLE_USER }

@@ -8,6 +8,7 @@ use AppBundle\Helper\Dictionary\SystemService;
 use FOS\RestBundle\Controller\Annotations\Get;
 use FOS\RestBundle\Controller\Annotations\Post;
 use FOS\RestBundle\Util\Codes;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -26,6 +27,23 @@ class SecurityController extends RestController
 
     /**
      * @Post(path="/login")
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Logs user in",
+     *  input = {
+     *      "class" = "user",
+     *      "options" = {"method" = "POST"},
+     *      "name" = ""
+     *  },
+     *  output = {
+     *      "class"="AppBundle\Document\User",
+     *      "parsers"={"Nelmio\ApiDocBundle\Parser\JmsMetadataParser"}
+     *  },
+     *  statusCodes={
+     *      401 = "Unauthorized (wrong password)",
+     *      404 = "Not found (wrong email)"
+     *  }
+     * )
      * @param Request $request
      * @return User|\FOS\RestBundle\View\View
      * @throws NotFoundHttpException|UnauthorizedHttpException
@@ -85,8 +103,12 @@ class SecurityController extends RestController
     }
 
     /**
-     * @param Request $request
      * @Get("/logout")
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Logs user out"
+     * )
+     * @param Request $request
      * @return bool
      */
     public function logoutAction(Request $request)

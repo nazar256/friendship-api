@@ -22,3 +22,4 @@ The ApiDoc resides at "/api/doc" route.
 * add accept friend request ability
 * add ability to see friends
 * add ability to see friends of friend on N-th level
+* write a test to check the ApiDoc availability for every route

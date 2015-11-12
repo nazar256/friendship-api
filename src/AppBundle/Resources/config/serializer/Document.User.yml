@@ -7,3 +7,9 @@ AppBundle\Document\User:
         email:
             type: string
             expose: true
+        friends:
+            type: array
+            expose: true
+        requests:
+            type: array
+            expose: true

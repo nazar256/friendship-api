@@ -101,14 +101,36 @@ abstract class RestControllerTestCase extends WebTestCase
      */
     protected function postRequest($route, array $params)
     {
+        return $this->makeRequest($route, HttpMethod::POST, [], json_encode($params));
+    }
+
+    /**
+     * @param string $route
+     * @param array  $params
+     * @return null|Response
+     */
+    protected function getRequest($route, array $params = [])
+    {
+        return $this->makeRequest($route, HttpMethod::GET, $params);
+    }
+
+    /**
+     * @param string $route
+     * @param string $method
+     * @param array  $queryParams
+     * @param string $requestBody
+     * @return null|Response
+     */
+    private function makeRequest($route, $method, array $queryParams = [], $requestBody = '')
+    {
         $client = $this->getClient();
         $client->request(
-            HttpMethod::POST,
+            $method,
             $route,
-            [],
+            $queryParams,
             [],
             ['HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json'],
-            json_encode($params)
+            $requestBody
         );
 
         return $client->getResponse();

@@ -22,6 +22,17 @@ class UserController extends RestController
     protected $entityName = 'AppBundle:User';
 
     /**
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Returns user data",
+     *  output = {
+     *      "class"="AppBundle\Document\User",
+     *      "parsers"={"Nelmio\ApiDocBundle\Parser\JmsMetadataParser"}
+     *  },
+     *  statusCodes={
+     *      404="Not found"
+     *  }
+     * )
      * @param User $user
      * @return User
      */

@@ -1,4 +1,7 @@
 # friendship-api (in development)
+### Status
+[![Build Status](https://travis-ci.org/nazar256/friendship-api.svg)](https://travis-ci.org/nazar256/friendship-api)
+
 It's a demo application of implementing REST API with Symfony2 and Doctrine MongoDb. 
 With an application you can register users, log in, add each other to friends and view friends of friends. 
 The ApiDoc resides at "/api/doc" route.

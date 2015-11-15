@@ -1,26 +1,40 @@
 <?php
 
+/**
+ * PhpUnit test
+ * PHP version 5.6
+ * @category Test
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     http://friendship-api.dev
+ */
+
 namespace AppBundle\Tests\Controller;
 
 use AppBundle\DataFixtures\MongoDB\UsersFixture;
 use AppBundle\Document\User;
-use AppBundle\Helper\Dictionary\SystemService;
-use Doctrine\ODM\MongoDB\DocumentManager;
 use FOS\RestBundle\Util\Codes;
 use TestingBundle\Helper\UniqueParamGenerator;
 use TestingBundle\Tests\Controller\RestControllerTestCase;
 
 /**
  * Class UserControllerTest
- * @package AppBundle\Tests\Controller
+ *
+ * @category Test
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     http://friendship-api.dev
  */
 class UserControllerTest extends RestControllerTestCase
 {
-    const ROUTE_REGISTER           = '/api/users/register';
-    const ROUTE_USER               = '/api/users/%s';
-    const ROUTE_REQUEST_FRIENDSHIP = '/api/users/%s/friendship/request';
+    const ROUTE_REGISTER = '/api/users/register';
+    const ROUTE_USER     = '/api/users/%s';
+    const ROUTE_ME       = '/api/users/me';
 
     /**
+     * Provides parameters for testing registration
      * @return array
      */
     public function registrationParamsProvider()
@@ -35,26 +49,36 @@ class UserControllerTest extends RestControllerTestCase
     }
 
     /**
+     * Tests registration route and params validation
+     *
+     * @param string $email       email
+     * @param string $password    password (not encrypted)
+     * @param bool   $mustBeValid if params are valid
+     *
+     * @return null
+     *
      * @dataProvider registrationParamsProvider
-     * @param string $email
-     * @param string $password
-     * @param bool   $mustBeValid
      */
-    public function testAnyoneCanRegisterWithValidParams($email, $password, $mustBeValid)
-    {
+    public function testAnyoneCanRegisterWithValidParams(
+        $email,
+        $password,
+        $mustBeValid
+    ) {
         $registrationParams = [
             'email'    => $email,
             'password' => $password
         ];
         $response = $this->postRequest(self::ROUTE_REGISTER, $registrationParams);
-        $expectedStatusCode = $mustBeValid ? Codes::HTTP_CREATED : Codes::HTTP_UNPROCESSABLE_ENTITY;
+        $expectedStatusCode = $mustBeValid ? Codes::HTTP_CREATED
+            : Codes::HTTP_UNPROCESSABLE_ENTITY;
         $responseData = $this->assertJsonResponse($response, $expectedStatusCode);
         if ($mustBeValid) {
             $this->assertArrayHasKey('id', $responseData);
             $userId = $responseData['id'];
-            $user = $this->getService(SystemService::ODM)
-                         ->getRepository('AppBundle:User')
-                         ->find($userId);
+            $user = $this
+                ->getDocumentManager()
+                ->getRepository('AppBundle:User')
+                ->find($userId);
             $this->assertInstanceOf('AppBundle\Document\User', $user);
             $this->assertArrayNotHasKey('password', $responseData);
         } else {
@@ -65,16 +89,22 @@ class UserControllerTest extends RestControllerTestCase
             $this->assertArrayHasKey('errors', $responseData);
             $this->assertArrayHasKey('children', $responseData['errors']);
             $this->assertArrayHasKey('email', $responseData['errors']['children']);
-            $this->assertArrayHasKey('password', $responseData['errors']['children']);
+            $this->assertArrayHasKey(
+                'password',
+                $responseData['errors']['children']
+            );
         }
     }
 
+    /**
+     * Tests route which returns own info
+     * @return null
+     */
     public function testUserRouteReturnsFriendsList()
     {
-        $user = $this->getUserByEmail(UsersFixture::TEST_EMAIL);
-        $userRoute = sprintf(self::ROUTE_USER, $user->getId());
-        $this->logUserIn();
-        $response = $this->getRequest($userRoute);
+        $user = $this->getUserByEmail(UsersFixture::DEFAULT_EMAIL);
+        $this->_logUserIn();
+        $response = $this->getRequest(self::ROUTE_ME);
         $responseData = $this->assertJsonResponse($response, Codes::HTTP_OK);
 
         $this->assertEquals($user->getId(), $responseData['id']);
@@ -92,31 +122,86 @@ class UserControllerTest extends RestControllerTestCase
         $this->assertEquals($user->getRequests(), $responseFriendRequests);
     }
 
-    public function testUserCanSendFriendRequest()
+    /**
+     * Returns params for friendship requests
+     * @return array
+     */
+    public function friendRequestDataProvider()
     {
-        $clientUser = $this->getUserByEmail(UsersFixture::CLIENT_EMAIL);
-        /** @var DocumentManager $dm */
-        $dm = $this->getService(SystemService::ODM);
-        /** @var User $defaultUser */
-        $defaultUser = $this->getUserByEmail(UsersFixture::TEST_EMAIL);
-        $this->logUserIn($clientUser->getEmail());
-        $route = sprintf(self::ROUTE_REQUEST_FRIENDSHIP, $defaultUser->getId());
-        $response = $this->postRequest($route);
-        $this->assertEquals(Codes::HTTP_NO_CONTENT, $response->getStatusCode());
-        $dm->refresh($defaultUser);
-        $this->assertContains($clientUser->getId(), $defaultUser->getRequests());
+        return [
+            [UsersFixture::CLIENT_EMAIL, Codes::HTTP_NO_CONTENT],
+            [UsersFixture::FRIEND_EMAIL, Codes::HTTP_CONFLICT],
+            ['non-existent-user@email.com', Codes::HTTP_NOT_FOUND]
+        ];
     }
 
     /**
-     * @param string $email
+     * Tests friend requesting feature
+     * @dataProvider friendRequestDataProvider
+     * @param string $friendEmail        email of user who will be requested a
+     *                                   friendship
+     * @param int    $expectedStatusCode HTTP status code
+     * @return null
      */
-    private function logUserIn($email = UsersFixture::TEST_EMAIL)
+    public function testUserCanSendFriendRequest($friendEmail, $expectedStatusCode)
+    {
+        $desiredFriend = $this->getUserByEmail($friendEmail);
+        $this->_logUserIn();
+        $friendId = $desiredFriend ? $desiredFriend->getId() : 'non-existent-id';
+        $route = sprintf(self::ROUTE_USER, $friendId);
+        $response = $this->linkRequest($route);
+        $this->assertEquals($expectedStatusCode, $response->getStatusCode());
+        if ($expectedStatusCode === Codes::HTTP_NO_CONTENT) {
+            /**
+             * User, who makes friend requests
+             * @var User $defaultUser
+             */
+            $defaultUser = $this->getUserByEmail(UsersFixture::DEFAULT_EMAIL);
+            $desiredFriend = $this->getUserByEmail($friendEmail);
+            $this->assertContains($friendId, $defaultUser->getFriends());
+            $defaultUserId = $defaultUser->getId();
+            $this->assertContains($defaultUserId, $desiredFriend->getRequests());
+        }
+    }
+
+    /**
+     * Tests that LINK request also accepts friendship request
+     * @return null
+     */
+    public function testUserCanAcceptFriendRequest()
+    {
+        $defaultUser = $this->getUserByEmail(UsersFixture::DEFAULT_EMAIL);
+        $requesters = $defaultUser->getRequests();
+        /**
+         * User who has requested friendship (already defined in fixtures)
+         * @var User $requester
+         */
+        $requesterId = reset($requesters);
+        $this->_logUserIn();
+        $route = sprintf(self::ROUTE_USER, $requesterId);
+        $response = $this->linkRequest($route);
+
+        $this->assertEquals(Codes::HTTP_NO_CONTENT, $response->getStatusCode());
+        $defaultUser = $this->getUserByEmail(UsersFixture::DEFAULT_EMAIL);
+        $this->assertContains($requesterId, $defaultUser->getFriends());
+        $this->assertNotContains($requesterId, $defaultUser->getRequests());
+    }
+
+    /**
+     * Logs user with specified email in
+     * @param string $email email of user to log in
+     * @return null
+     */
+    private function _logUserIn($email = UsersFixture::DEFAULT_EMAIL)
     {
         $loginParams = [
             'email'    => $email,
             'password' => UsersFixture::TEST_PASS
         ];
-        $response = $this->postRequest(SecurityControllerTest::ROUTE_LOGIN, $loginParams);
+        $response = $this->postRequest(
+            SecurityControllerTest::ROUTE_LOGIN,
+            $loginParams
+        );
         $this->assertEquals(Codes::HTTP_OK, $response->getStatusCode());
     }
 }

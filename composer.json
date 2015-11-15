@@ -28,7 +28,9 @@
         "sensio/generator-bundle": "~2.3",
         "phpmd/phpmd": "^2.3",
         "doctrine/doctrine-fixtures-bundle": "^2.3",
-        "liip/functional-test-bundle": "^1.2"
+        "liip/functional-test-bundle": "^1.2",
+        "squizlabs/php_codesniffer": "^2.3",
+        "escapestudios/symfony2-coding-standard": "^2.7"
     },
     "scripts": {
         "post-install-cmd": [

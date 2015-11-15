@@ -21,8 +21,8 @@ class SecurityControllerTest extends RestControllerTestCase
     {
         return [
             ['invalid@email.bad', UsersFixture::TEST_PASS, Codes::HTTP_NOT_FOUND],
-            [UsersFixture::TEST_EMAIL, 'WrongPass', Codes::HTTP_UNAUTHORIZED],
-            [UsersFixture::TEST_EMAIL, UsersFixture::TEST_PASS, Codes::HTTP_OK],
+            [UsersFixture::DEFAULT_EMAIL, 'WrongPass', Codes::HTTP_UNAUTHORIZED],
+            [UsersFixture::DEFAULT_EMAIL, UsersFixture::TEST_PASS, Codes::HTTP_OK],
         ];
     }
 
@@ -43,7 +43,7 @@ class SecurityControllerTest extends RestControllerTestCase
         if ($expectedStatusCode === Codes::HTTP_OK) {
             $this->assertArrayHasKey('id', $responseData);
             /** @var User $user */
-            $user = $this->getUserByEmail(UsersFixture::TEST_EMAIL);
+            $user = $this->getUserByEmail(UsersFixture::DEFAULT_EMAIL);
             $this->assertEquals($user->getId(), $responseData['id']);
             $this->assertArrayHasKey('email', $responseData);
             $this->assertEquals($user->getEmail(), $responseData['email']);

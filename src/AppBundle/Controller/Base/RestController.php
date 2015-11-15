@@ -11,13 +11,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 abstract class RestController extends FOSRestController
 {
-
     /**
+     * Form alias name for resource entity of this controller
      * @var string
      */
     protected $formName = 'form';
 
     /**
+     * Doctrine repository name for resource entity of this controller
      * @var string
      */
     protected $entityName = null;

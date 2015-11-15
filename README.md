@@ -1,5 +1,4 @@
 # friendship-api (in development)
-### Status
 [![Build Status](https://travis-ci.org/nazar256/friendship-api.svg)](https://travis-ci.org/nazar256/friendship-api)
 
 It's a demo application of implementing REST API with Symfony2 and Doctrine MongoDb. 
@@ -17,13 +16,20 @@ The ApiDoc resides at "/api/doc" route.
 ## It does not include
 * Doctrine ORM
 
+## Some logic
+* anyone can add another to friends (subscribe), this adds desired users to 
+"friends" array and performs friend request;
+* to accept friendship request you just need to add that guy to your friends
+
+## Some features
+* the API authorization is not oAuth or something "right" for REST, it works by sending auth params by POST 
+instead to be compatible with JS frameworks, including Backbone;
+* for the same reason - easy using with Backbone API does not return Location 
+header on item creation, it returns full created object instead
+* API does not actually implement HATEOAS as it's not required yet
+
 ## TODO
-* Drop test database on every test run
 * create vagrant script
 * use nelmio/alice for fixtures generation
-* add request friendship ability
-* add accept friend request ability
-* add ability to see friends
 * add ability to see friends of friend on N-th level
 * write a test to check the ApiDoc availability for every route
-* add constraints to view only own profile and friends

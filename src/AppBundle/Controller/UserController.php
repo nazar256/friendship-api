@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Class container
+ * PHP version 5.6
+ * @category Class
+ * @package AppBundle
+ * @author nazar <jura_n@bk.ru>
+ * @license MIT @link https://opensource.org/licenses/MIT
+ * @link /api/users
+ */
+
 namespace AppBundle\Controller;
 
 use AppBundle\Controller\Base\RestController;
@@ -8,21 +18,34 @@ use FOS\RestBundle\Controller\Annotations\Post;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
- * Class UserController
- * @package AppBundle\Controller
+ * REST controller
+ * @category Controller
+ * @package AppBundle
+ * @author nazar <jura_n@bk.ru>
+ * @license MIT @link https://opensource.org/licenses/MIT
+ * @link /api/users
  */
 class UserController extends RestController
 {
-    /** @var string */
+    /**
+     * {@inheritdoc}
+     */
     protected $formName = 'user';
 
-    /** @var string */
+    /**
+     * {@inheritdoc}
+     */
     protected $entityName = 'AppBundle:User';
 
     /**
+     * Returns current user info
+     *
+     * @return User
+     *
      * @ApiDoc(
      *  resource=true,
      *  description="Returns user data",
@@ -31,18 +54,27 @@ class UserController extends RestController
      *      "parsers"={"Nelmio\ApiDocBundle\Parser\JmsMetadataParser"}
      *  },
      *  statusCodes={
-     *      404="Not found"
+     *      401="Unauthorized"
      *  }
      * )
-     * @param User $user
-     * @return User
      */
-    public function getAction(User $user)
+    public function getMeAction()
     {
-        return $user;
+        $currentUser = $this->getUser();
+        if (!$currentUser instanceof User) {
+            throw new UnauthorizedHttpException('Probably you are not authorized');
+        }
+
+        return $currentUser;
     }
 
     /**
+     * Registers a new user
+     *
+     * @param Request $request request
+     *
+     * @return User
+     *
      * @Post("/register")
      * @ApiDoc(
      *  resource=true,
@@ -62,8 +94,6 @@ class UserController extends RestController
      *  }
      * )
      * @View(statusCode=201, templateVar="user", template="json")
-     * @param Request $request
-     * @return User
      */
     public function postAction(Request $request)
     {
@@ -71,26 +101,44 @@ class UserController extends RestController
     }
 
     /**
-     * @Post("/{user}/friendship/request")
+     * Route to add friends (which also accepts friend requests)
+     *
+     * @param User $friend User to link current user with
+     *
+     * @return null
+     *
      * @ApiDoc(
      *  resource=false,
      *  description="Creates a friendship request of current user to desired one",
      *  statusCodes={
      *      401 = "Unauthorized - log in first",
-     *      204 = "Successfully requested"
+     *      204 = "Successfully requested",
+     *      409 = "User already added as friend"
      *  }
      * )
-     * @param User $user
      */
-    public function requestFriendshipAction(User $user)
+    public function linkAction(User $friend)
     {
         $currentUser = $this->getUser();
-        if ( !$currentUser instanceof User) {
+        if (!$currentUser instanceof User) {
             throw new UnauthorizedHttpException('Probably you are not authorized');
         }
+        $currentUserId = $currentUser->getId();
+        $friendId = $friend->getId();
+        if ($currentUser->hasFriend($friendId)) {
+            $conflictMessage = sprintf('user %s is already your friend', $friendId);
+            throw new ConflictHttpException($conflictMessage);
+        }
 
-        $user->addRequest($currentUser->getId());
-        $dm = $this->get('doctrine.odm.mongodb.document_manager');
-        $dm->flush();
+        // Add a friend (subscription) and make friendship request
+        $currentUser->addFriend($friendId);
+        $friend->addRequest($currentUserId);
+
+        // Accept removes request if exists any
+        $currentUser->removeRequest($friendId);
+
+        // Persist changes to DB
+        $documentManager = $this->get('doctrine.odm.mongodb.document_manager');
+        $documentManager->flush();
     }
 }

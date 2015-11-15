@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Class container
+ * PHP version 5.6
+ * @category Fixture
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     http://friendship-api.dev
+ */
+
 namespace AppBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
@@ -7,6 +17,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
+ * Fixture creates User documents for tests
+ *
+ * @category Controller
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     http://friendship-api.dev
+ *
  * @MongoDB\Document
  */
 class User implements UserInterface, \Serializable
@@ -14,69 +32,91 @@ class User implements UserInterface, \Serializable
     const ALIAS = 'user';
 
     /**
+     * ObjectId
+     *
      * @var string
+     *
      * @MongoDB\Id
      */
-    private $id;
+    private $_id;
 
     /**
+     * User's email
+     *
      * @var string
+     *
      * @Assert\NotBlank()
      * @Assert\Email(checkMX=true, checkHost=true)
      * @MongoDB\String
      * @MongoDB\Index()
      */
-    private $email;
+    private $_email;
 
     /**
+     * User's password (encrypted)
+     *
      * @var string
+     *
      * @MongoDB\String
      * @Assert\NotBlank()
-     * @Assert\Length(min="8", minMessage="Your password must contain at least 8 characters")
+     * @Assert\Length(min="8", minMessage="Your password must contain at least 8
+     *     characters")
      */
-    private $password;
+    private $_password;
 
     /**
-     * @var array
+     * Array of subscribed friends (friend requests of current user)
+     *
+     * @var string[]
+     *
      * @MongoDB\Collection()
      */
-    private $friends = [];
+    private $_friends = [];
 
     /**
-     * @var array
+     * Array of friendship requests (which users requested current user to friends)
+     *
+     * @var string[]
+     *
      * @MongoDB\Collection()
      */
-    private $requests = [];
+    private $_requests = [];
 
     /**
+     * Returns ID
      * @return int
      */
     public function getId()
     {
-        return $this->id;
+        return $this->_id;
     }
 
     /**
+     * Returns password
      * @return string
      */
     public function getPassword()
     {
-        return $this->password;
+        return $this->_password;
     }
 
     /**
-     * @param string $password
+     * Sets encrypted password
+     *
+     * @param string $_password encrypted password
+     *
      * @return $this
      */
-    public function setPassword($password)
+    public function setPassword($_password)
     {
-        $this->password = $password;
+        $this->_password = $_password;
 
         return $this;
     }
 
     /**
      * {@inheritdoc}
+     * @return string[]
      */
     public function getRoles()
     {
@@ -85,6 +125,7 @@ class User implements UserInterface, \Serializable
 
     /**
      * {@inheritdoc}
+     * @return null
      */
     public function getSalt()
     {
@@ -102,61 +143,101 @@ class User implements UserInterface, \Serializable
     }
 
     /**
+     * Returns email
      * @return string
      */
     public function getEmail()
     {
-        return $this->email;
+        return $this->_email;
     }
 
     /**
-     * @param string $email
+     * Sets an email
+     *
+     * @param string $_email new email
+     *
      * @return $this
      */
-    public function setEmail($email)
+    public function setEmail($_email)
     {
-        $this->email = $email;
+        $this->_email = $_email;
 
         return $this;
     }
 
     /**
-     * @return array
+     * Returns friend IDs
+     * @return string[]
      */
     public function getFriends()
     {
-        return $this->friends;
+        return $this->_friends;
     }
 
     /**
-     * @param string $friendId
+     * Adds a new friend
+     * @param string $friendId new friend id
      * @return $this
      */
     public function addFriend($friendId)
     {
-        if ( !in_array($friendId, $this->friends)) {
-            $this->friends[] = $friendId;
+        if (!$this->hasFriend($friendId)) {
+            $this->_friends[] = $friendId;
         }
 
         return $this;
     }
 
     /**
-     * @return array
+     * Checks if current user already has certain friend
+     * @param string $friendId friend id to check
+     * @return bool
      */
-    public function getRequests()
+    public function hasFriend($friendId)
     {
-        return $this->requests;
+        return in_array($friendId, $this->_friends);
     }
 
     /**
-     * @param string $userId
+     * Returns array of IDs of friendship requests
+     * @return string[]
+     */
+    public function getRequests()
+    {
+        return $this->_requests;
+    }
+
+    /**
+     * Removes friend request
+     * @param string $requesterId ID of user
+     * @return $this
+     */
+    public function removeRequest($requesterId)
+    {
+        $this->_requests = array_diff($this->_requests, [$requesterId]);
+
+        return $this;
+    }
+
+    /**
+     * Checks if current user was requested a frienship by certain user
+     * @param string $requesterId user id who requested friendship
+     * @return bool
+     */
+    public function hasRequest($requesterId)
+    {
+        return in_array($requesterId, $this->_friends);
+    }
+
+    /**
+     * Adds friendship request
+     * @param string $userId ID of user who requests friendship
      * @return $this
      */
     public function addRequest($userId)
     {
-        if ( !in_array($userId, $this->requests)) {
-            $this->requests[] = $userId;
+        if (!in_array($userId, $this->_requests)) {
+            $this->_requests[] = $userId;
         }
 
         return $this;
@@ -165,6 +246,7 @@ class User implements UserInterface, \Serializable
 
     /**
      * {@inheritdoc}
+     * @return null
      */
     public function eraseCredentials()
     {
@@ -173,27 +255,30 @@ class User implements UserInterface, \Serializable
 
     /**
      * {@inheritdoc}
+     * @return string
      */
     public function serialize()
     {
         return serialize(
             [
-                $this->id,
-                $this->email,
-                $this->password,
+                $this->_id,
+                $this->_email,
+                $this->_password,
             ]
         );
     }
 
     /**
      * {@inheritdoc}
+     * @param string $serialized serialized string
+     * @return User
      */
     public function unSerialize($serialized)
     {
         list (
-            $this->id,
-            $this->email,
-            $this->password,
+            $this->_id,
+            $this->_email,
+            $this->_password,
             ) = unserialize($serialized);
     }
 }

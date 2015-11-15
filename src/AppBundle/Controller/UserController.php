@@ -4,16 +4,17 @@
  * Class container
  * PHP version 5.6
  * @category Class
- * @package AppBundle
- * @author nazar <jura_n@bk.ru>
- * @license MIT @link https://opensource.org/licenses/MIT
- * @link /api/users
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     /api/users
  */
 
 namespace AppBundle\Controller;
 
 use AppBundle\Controller\Base\RestController;
 use AppBundle\Document\User;
+use FOS\RestBundle\Controller\Annotations;
 use FOS\RestBundle\Controller\Annotations\Post;
 use FOS\RestBundle\Controller\Annotations\View;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -24,10 +25,10 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 /**
  * REST controller
  * @category Controller
- * @package AppBundle
- * @author nazar <jura_n@bk.ru>
- * @license MIT @link https://opensource.org/licenses/MIT
- * @link /api/users
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     /api/users
  */
 class UserController extends RestController
 {
@@ -116,6 +117,7 @@ class UserController extends RestController
      *      409 = "User already added as friend"
      *  }
      * )
+     * @Annotations\Link(requirements={"friend"="\w{24}"})
      */
     public function linkAction(User $friend)
     {

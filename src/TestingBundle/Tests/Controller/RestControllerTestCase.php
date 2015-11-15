@@ -194,7 +194,7 @@ abstract class RestControllerTestCase extends WebTestCase
         return $this
             ->getDocumentManager()
             ->getRepository('AppBundle:User')
-            ->findOneBy(['email' => $email]);
+            ->findOneBy(['_email' => $email]);
     }
 
     /**

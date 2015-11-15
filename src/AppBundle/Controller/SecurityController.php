@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Controller container
+ * PHP version 5.6
+ * @category Class
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     http://friendship-api.dev
+ */
+
 namespace AppBundle\Controller;
 
 use AppBundle\Controller\Base\RestController;
@@ -18,14 +28,25 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 /**
- * Class SecurityController
- * @package AppBundle\Controller
+ * Controller which is responsible for logging in and out
+ * @category Controller
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     /api/login
  */
 class SecurityController extends RestController
 {
     const MSG_NOT_FOUND = 'User with email %s was not found.';
 
     /**
+     * Login action
+     *
+     * @param Request $request request object
+     *
+     * @return User|\FOS\RestBundle\View\View
+     * @throws NotFoundHttpException|UnauthorizedHttpException
+     *
      * @Post(path="/login")
      * @ApiDoc(
      *  resource=true,
@@ -44,9 +65,6 @@ class SecurityController extends RestController
      *      404 = "Not found (wrong email)"
      *  }
      * )
-     * @param Request $request
-     * @return User|\FOS\RestBundle\View\View
-     * @throws NotFoundHttpException|UnauthorizedHttpException
      */
     public function loginAction(Request $request)
     {
@@ -61,63 +79,84 @@ class SecurityController extends RestController
         $plainPassword = $request->request->get('password');
         $email = $request->request->get('email');
 
-        /** @var User $user */
+        /**
+         * User who tries to login
+         * @var User $user
+         */
         $user = $this
             ->get(SystemService::ODM)
             ->getRepository('AppBundle:User')
             ->findOneBy(
                 [
-                    'email' => $email
+                    '_email' => $email
                 ]
             );
         if (empty($user)) {
             throw new NotFoundHttpException(sprintf(self::MSG_NOT_FOUND, $email));
         }
 
-        /** @var UserPasswordEncoder $encoder */
+        /**
+         * Symfony password encoder
+         * @var UserPasswordEncoder $encoder
+         */
         $encoder = $this->container->get('security.password_encoder');
         $passwordIsValid = $encoder->isPasswordValid($user, $plainPassword);
-        if ( !$passwordIsValid) {
+        if (!$passwordIsValid) {
             throw new UnauthorizedHttpException('Password is invalid');
         }
-        $this->authenticateUser($user);
+        $this->_authenticateUser($user);
 
         return $user;
     }
 
     /**
-     * @param UserInterface $user
+     * Authenticates user session
+     * @param UserInterface $user user
+     * @return null
      */
-    private function authenticateUser(UserInterface $user)
+    private function _authenticateUser(UserInterface $user)
     {
         // Authenticating user
-        $token = new UsernamePasswordToken($user, null, 'app_user_provider', $user->getRoles());
-        $this->get('security.token_storage')
-             ->setToken($token);
+        $token = new UsernamePasswordToken(
+            $user,
+            null,
+            'app_user_provider',
+            $user->getRoles()
+        );
+        $this
+            ->get('security.token_storage')
+            ->setToken($token);
 
         //now dispatch the login event
         $request = $this->get("request");
         $event = new InteractiveLoginEvent($request, $token);
-        $this->get("event_dispatcher")
-             ->dispatch("security.interactive_login", $event);
+        $this
+            ->get("event_dispatcher")
+            ->dispatch("security.interactive_login", $event);
     }
 
     /**
+     * Invalidates user session
+     *
+     * @param Request $request request object
+     *
+     * @return bool
+     *
      * @Get("/logout")
      * @ApiDoc(
      *  resource=true,
      *  description="Logs user out"
      * )
-     * @param Request $request
-     * @return bool
      */
     public function logoutAction(Request $request)
     {
         try {
-            $request->getSession()
-                    ->invalidate();
-            $this->get('security.token_storage')
-                 ->setToken(null);
+            $request
+                ->getSession()
+                ->invalidate();
+            $this
+                ->get('security.token_storage')
+                ->setToken(null);
 
             return true;
         } catch (\Exception $e) {

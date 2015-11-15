@@ -1,15 +1,19 @@
 AppBundle\Document\User:
     exclusion_policy: ALL
     properties:
-        id:
+        _id:
+            serialized_name: id
             type: string
             expose: true
-        email:
+        _email:
+            serialized_name: email
             type: string
             expose: true
-        friends:
+        _friends:
+            serialized_name: friends
             type: array
             expose: true
-        requests:
+        _requests:
+            serialized_name: requests
             type: array
             expose: true

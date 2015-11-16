@@ -1,4 +1,4 @@
-# friendship-api (in development)
+# friendship-api
 [![Build Status](https://travis-ci.org/nazar256/friendship-api.svg)](https://travis-ci.org/nazar256/friendship-api)
 
 It's a demo application of implementing REST API with Symfony2 and Doctrine MongoDb. 
@@ -27,9 +27,11 @@ instead to be compatible with JS frameworks, including Backbone;
 * for the same reason - easy using with Backbone API does not return Location 
 header on item creation, it returns full created object instead
 * API does not actually implement HATEOAS as it's not required yet
+* in real situations if every user have near 200 friends, maximum nesting level would be 2
 
 ## TODO
 * create vagrant script
 * use nelmio/alice for fixtures generation
 * write a bundle to test the ApiDoc availability for every route (or find one)
 * implement Symfony 2.7 code sniffer standard to all project files!
+* find solution to reach high nesting level when database contains billions of users

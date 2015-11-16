@@ -17,6 +17,7 @@ use AppBundle\Document\User;
 use FOS\RestBundle\Controller\Annotations;
 use FOS\RestBundle\Controller\Annotations\Post;
 use FOS\RestBundle\Controller\Annotations\View;
+use FOS\RestBundle\Request\ParamFetcherInterface;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -142,5 +143,43 @@ class UserController extends RestController
         // Persist changes to DB
         $documentManager = $this->get('doctrine.odm.mongodb.document_manager');
         $documentManager->flush();
+    }
+
+    /**
+     * Returns list of found friends IDs for specified nesting level
+     *
+     * @param ParamFetcherInterface $paramFetcher Symfony param fetcher
+     *
+     * @return string[]
+     *
+     * @Annotations\Get("/me/friends")
+     * @Annotations\QueryParam(
+     *     name="nesting",
+     *     requirements="\d+",
+     *     strict=true,
+     *     default="0",
+     *     description="Nesting level to query friends"
+     * )
+     * @ApiDoc(
+     *  resource=false,
+     *  statusCodes={
+     *      401="Unauthorized"
+     *  }
+     * )
+     */
+    public function getMyFriendsAction(ParamFetcherInterface $paramFetcher)
+    {
+        $nestingLevel = $paramFetcher->get('nesting');
+        $documentManager = $this->get('doctrine.odm.mongodb.document_manager');
+        /**
+         * Current user to query friends
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+        $friends = $documentManager
+            ->getRepository('AppBundle:User')
+            ->findNestedFriends($currentUser->getId(), $nestingLevel);
+
+        return $friends;
     }
 }

@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @license  MIT @link https://opensource.org/licenses/MIT
  * @link     http://friendship-api.dev
  *
- * @MongoDB\Document
+ * @MongoDB\Document(repositoryClass="AppBundle\DocumentRepository\UserRepository")
  */
 class User implements UserInterface, \Serializable
 {
@@ -220,7 +220,7 @@ class User implements UserInterface, \Serializable
     }
 
     /**
-     * Checks if current user was requested a frienship by certain user
+     * Checks if current user was requested a friendship by certain user
      * @param string $requesterId user id who requested friendship
      * @return bool
      */

@@ -31,6 +31,5 @@ header on item creation, it returns full created object instead
 ## TODO
 * create vagrant script
 * use nelmio/alice for fixtures generation
-* add ability to see friends of friend on N-th level
 * write a bundle to test the ApiDoc availability for every route (or find one)
 * implement Symfony 2.7 code sniffer standard to all project files!

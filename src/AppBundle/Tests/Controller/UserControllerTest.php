@@ -32,6 +32,7 @@ class UserControllerTest extends RestControllerTestCase
     const ROUTE_REGISTER = '/api/users/register';
     const ROUTE_USER     = '/api/users/%s';
     const ROUTE_ME       = '/api/users/me';
+    const ROUTE_FRIENDS  = '/api/users/me/friends';
 
     /**
      * Provides parameters for testing registration
@@ -171,12 +172,12 @@ class UserControllerTest extends RestControllerTestCase
     public function testUserCanAcceptFriendRequest()
     {
         $defaultUser = $this->getUserByEmail(UsersFixture::DEFAULT_EMAIL);
-        $requesters = $defaultUser->getRequests();
+        $friendRequests = $defaultUser->getRequests();
         /**
          * User who has requested friendship (already defined in fixtures)
          * @var User $requester
          */
-        $requesterId = reset($requesters);
+        $requesterId = reset($friendRequests);
         $this->_logUserIn();
         $route = sprintf(self::ROUTE_USER, $requesterId);
         $response = $this->linkRequest($route);
@@ -185,6 +186,43 @@ class UserControllerTest extends RestControllerTestCase
         $defaultUser = $this->getUserByEmail(UsersFixture::DEFAULT_EMAIL);
         $this->assertContains($requesterId, $defaultUser->getFriends());
         $this->assertNotContains($requesterId, $defaultUser->getRequests());
+        $this->reloadFixtures([UsersFixture::class]);
+    }
+
+    /**
+     * Provides nesting level and expected result friends count
+     * @return array
+     */
+    public function nestingLevelProvider()
+    {
+        $expectedValues = [];
+        $totalUserCount = 0;
+        for ($nestingLevel = 0; $nestingLevel <= 4; $nestingLevel++) {
+            $totalUserCount +=
+                UsersFixture::INITIAL_FRIENDS_COUNT - $nestingLevel;
+            $expectedValues[] = [$nestingLevel, $totalUserCount];
+        }
+
+        return $expectedValues;
+    }
+
+    /**
+     * Tests total friends amount with specific nesting level
+     * @dataProvider nestingLevelProvider
+     * @param int $nestingLevel  how many times to retrieve users of users
+     * @param int $friendsAmount expected total amount of found friends
+     * @return null
+     */
+    public function testUserCanRequestFriendsOfFriends($nestingLevel, $friendsAmount)
+    {
+        $this->_logUserIn();
+        $response = $this->getRequest(
+            self::ROUTE_FRIENDS,
+            ['nesting' => $nestingLevel]
+        );
+
+        $responseData = $this->assertJsonResponse($response, Codes::HTTP_OK);
+        $this->assertCount($friendsAmount, $responseData);
     }
 
     /**

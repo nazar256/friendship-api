@@ -4,10 +4,10 @@
  * Class container
  * PHP version 5.6
  * @category Fixture
- * @package AppBundle
- * @author nazar <jura_n@bk.ru>
- * @license MIT @link https://opensource.org/licenses/MIT
- * @link http://friendship-api.dev
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     http://friendship-api.dev
  */
 
 namespace AppBundle\DataFixtures\MongoDB;
@@ -21,17 +21,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Fixture creates User documents for tests
  * @category Controller
- * @package AppBundle
- * @author nazar <jura_n@bk.ru>
- * @license MIT @link https://opensource.org/licenses/MIT
- * @link http://friendship-api.dev
+ * @package  AppBundle
+ * @author   nazar <jura_n@bk.ru>
+ * @license  MIT @link https://opensource.org/licenses/MIT
+ * @link     http://friendship-api.dev
  */
 class UsersFixture extends AbstractFixture implements ContainerAwareInterface
 {
-    const DEFAULT_EMAIL = 'default-email@gmail.com';
-    const CLIENT_EMAIL  = 'client@gmail.com';
-    const TEST_PASS     = 'SecurePassword123';
-    const FRIEND_EMAIL  = 'friend-email@gmail.com';
+    const DEFAULT_EMAIL         = 'default-email@gmail.com';
+    const CLIENT_EMAIL          = 'client@gmail.com';
+    const TEST_PASS             = 'SecurePassword123';
+    const FRIEND_EMAIL          = 'friend-email@gmail.com';
+    const INITIAL_FRIENDS_COUNT = 6;
 
     /**
      * Service container
@@ -56,55 +57,66 @@ class UsersFixture extends AbstractFixture implements ContainerAwareInterface
      */
     public function load(ObjectManager $manager)
     {
-        $encoder = $this->_container->get('security.password_encoder');
+        // User who will request friendship in tests
+        $friendshipRequester = $this->_createUser($manager);
+        // User who will request something from default user (maybe also friendship)
+        $this->_createUser($manager, self::CLIENT_EMAIL);
+        // Default user for test operations and logging in
+        $defaultUser = $this->_createUser($manager, self::DEFAULT_EMAIL);
 
-        /**
-         * Array of users which will be created for tests
-         * @var User[] $users
-         */
-        $users = [];
-        for ($userCount = 0; $userCount < 6; $userCount++) {
-            $user = new User();
-            $email = sprintf('some_%s@gmail.com', uniqid());
-            $user->setEmail($email);
-            $user->setPassword(self::TEST_PASS);
-            $encryptedPassword = $encoder->encodePassword($user, self::TEST_PASS);
-            $user->setPassword($encryptedPassword);
-            $users[] = $user;
-            $manager->persist($user);
+        $friendsByLevels = [];
+        for ($nestingLevel = 0; $nestingLevel <= 4; $nestingLevel++) {
+            $friendsByLevels[$nestingLevel] = [];
+            $howMany = self::INITIAL_FRIENDS_COUNT - $nestingLevel;
+            for ($friendCount = 0; $friendCount < $howMany; $friendCount++) {
+                $friendsByLevels[$nestingLevel][] = $this->_createUser($manager);
+            }
         }
         /**
-         * User who will request friendship in tests
-         * @var User $friendshipRequester
+         * Some of defaultUser friends
+         * @var User $someFriend
          */
-        $friendshipRequester = array_pop($users);
-        /**
-         * User who will request something from default user (maybe also friendship)
-         * @var User $clientUser
-         */
-        $clientUser = array_pop($users);
-        $clientUser->setEmail(self::CLIENT_EMAIL);
-        /**
-         * Default user for test operations and logging in
-         * @var User $defaultUser
-         */
-        $defaultUser = array_pop($users);
-        $defaultUser->setEmail(self::DEFAULT_EMAIL);
-        /**
-         * One of already added friends who has specific email
-         * @var User $friend
-         */
-        $friend = reset($users);
-        $friend->setEmail(self::FRIEND_EMAIL);
+        $someFriend = $friendsByLevels[0][0];
+        $someFriend->setEmail(self::FRIEND_EMAIL);
 
         $manager->flush();
 
-        foreach ($users as $friend) {
-            $defaultUser->addFriend($friend->getId());
-            $friend->addFriend($defaultUser->getId());
+        // Adding nested friends
+        $currentLevelUser = $defaultUser;
+        foreach ($friendsByLevels as $nestingLevel => $friends) {
+            /**
+             * Friend of user of current nesting level
+             * @var User $friend
+             */
+            foreach ($friends as $friend) {
+                $currentLevelUser->addFriend($friend->getId());
+                $friend->addFriend($currentLevelUser->getId());
+            }
+            $currentLevelUser = end($friends);
         }
+
         $defaultUser->addRequest($friendshipRequester->getId());
 
         $manager->flush();
+    }
+
+    /**
+     * Creates a new user document and persist it
+     * @param ObjectManager $manager object manager
+     * @param string|null   $email   email to create user with
+     * @return User
+     */
+    private function _createUser(ObjectManager $manager, $email = null)
+    {
+        $user = new User();
+        $email = $email ?: sprintf('some_%s@gmail.com', uniqid());
+        $user->setEmail($email);
+        $user->setPassword(self::TEST_PASS);
+        $encoder = $this->_container->get('security.password_encoder');
+        $encryptedPassword = $encoder->encodePassword($user, self::TEST_PASS);
+        $user->setPassword($encryptedPassword);
+        $manager->persist($user);
+
+        return $user;
     }
 }
